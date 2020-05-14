@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<title>Letter Labyrinth</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue.css">
+<style>
+html, body, h1, h2, h3, h4, h5, h6 {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+}
+</style>
+
+<script type="text/javascript">
+	//doResize();
+	function doResize() {
+	   document.getElementById("id-header-placeholder").style.height = document.getElementById("id-header").offsetHeight + "px";
+	   document.getElementById("id-footer-placeholder").style.height = document.getElementById("id-footer").offsetHeight + "px";
+	   document.getElementById("id-main").style.height = window.innerHeight - document.getElementById("id-header").offsetHeight - document.getElementById("id-footer").offsetHeight + "px";
+	};
+	function doOnLoad(){
+		doResize();
+		doTest();
+	};
+	window.addEventListener("resize", doResize);
+	window.addEventListener("load", doOnLoad);
+</script>
+
+
+<!--<script type="module" src="./main.js"></script>-->
+<script type="text/javascript" src="letlab.js"></script>
+
+<script type="text/javascript">
+//var cellsize = 40;
+function doTheJob(){
+	let ms = parseInt(document.getElementById("select_matrix_size").value);
+	let ch = document.getElementById("select_characters").value;
+	let cs = parseInt(document.getElementById("select_cellsize").value);
+	let highlight = document.getElementById("chk_highlight").checked;
+	document.getElementById("placeofthematrix").innerHTML = generateHTML(ms, ms, ch, cs, highlight);
+	document.getElementById("placeofthemessage").innerHTML = '&nbsp;';
+	document.getElementById("placeofthemessage").disabled = false;
+}
+function doTest(){
+	document.getElementById("placeofthemessage").disabled = true;
+	let ms = parseInt(document.getElementById("select_matrix_size").value);
+	let cs = parseInt(document.getElementById("select_cellsize").value);
+	document.getElementById("placeofthematrix").innerHTML = generateEmptyHTML(ms, ms, cs);
+	document.getElementById("id_cell_container").style.width = '' + (cs * ms + 83) + 'px';
+	document.getElementById("placeofthemessage").innerHTML = 'Please wait ...';
+	setTimeout(() => doTheJob(), 100);
+};
+function doOnChangeMatrixSize(){
+	let ms = parseInt(document.getElementById("select_matrix_size").value);
+	let cs = parseInt(document.getElementById("select_cellsize").value);
+	document.getElementById("placeofthematrix").innerHTML = generateEmptyHTML(ms, ms, cs);
+	document.getElementById("id_cell_container").style.width = '' + (cs * ms + 83) + 'px';
+};
+function doOnChangeCharacters(){
+	let ms = parseInt(document.getElementById("select_matrix_size").value);
+	let cs = parseInt(document.getElementById("select_cellsize").value);
+	document.getElementById("placeofthematrix").innerHTML = generateEmptyHTML(ms, ms, cs);
+	//document.getElementById("id_cell_container").style.width = '' + (cs * ms + 83) + 'px';
+};
+function doOnChangeCellsize(){
+	let ms = parseInt(document.getElementById("select_matrix_size").value);
+	let cs = parseInt(document.getElementById("select_cellsize").value);
+	let highlight = document.getElementById("chk_highlight").checked;
+	document.getElementById("placeofthematrix").innerHTML = getLastMatrixHTML(cs, highlight);
+	document.getElementById("id_cell_container").style.width = '' + (cs * ms + 83) + 'px';
+};
+function doOnChangeHighlight(){
+	let cs = parseInt(document.getElementById("select_cellsize").value);
+	let highlight = document.getElementById("chk_highlight").checked;
+	document.getElementById("placeofthematrix").innerHTML = getLastMatrixHTML(cs, highlight);
+};
+</script>
+
+<body class="w3-theme-l5">
+
+<!--<header class="w3-container w3-light-blue w3-top">-->
+<header class="w3-container w3-theme-l3 w3-top" id="id-header">
+  <!--<div class="w3-bar w3-black">
+    <a href="#" class="w3-bar-item w3-button">Home</a>
+    <a href="#" class="w3-bar-item w3-button">Link 1</a>
+    <a href="#" class="w3-bar-item w3-button">Link 2</a>
+    <a href="#" class="w3-bar-item w3-button">Link 3</a>
+</div>-->
+
+<div class="w3-bar w3-theme-l3">
+
+	<span class="w3-bar-item w3-text-indigo w3-left" style="padding-right:0px; padding-left:0px;">
+		<div style="width: 27px; height: 27px; background: repeating-linear-gradient(135deg, white 0px, white 19px, orange 19px, orange 38px);"></div>
+	</span>
+
+  <span class="w3-bar-item w3-text-indigo w3-left">Letter Labyrinth</span>
+  <!--
+  <a href="#" class="w3-bar-item w3-button w3-text-indigo w3-hover-blue w3-text-pink">Home</a>
+  <a href="#" class="w3-bar-item w3-button w3-text-indigo w3-hover-blue">Link 1</a>
+  <a href="#" class="w3-bar-item w3-button w3-text-indigo w3-hover-blue">Link 2</a>
+  <a href="#" class="w3-bar-item w3-button w3-text-indigo w3-hover-blue">Link 3</a>
+  <div class="w3-dropdown-hover">
+    <button class="w3-button w3-text-indigo w3-theme-l3 w3-hover-blue">Dropdown</button>
+    <div class="w3-dropdown-content w3-bar-block w3-card-4 w3-theme-l3">
+      <a href="#" class="w3-bar-item w3-button w3-text-indigo w3-hover-blue">Link 11</a>
+      <a href="#" class="w3-bar-item w3-button w3-text-indigo w3-hover-blue">Link 12</a>
+      <a href="#" class="w3-bar-item w3-button w3-text-indigo w3-hover-blue">Link 13</a>
+    </div>
+  </div>
+  <span class="w3-bar-item w3-text-indigo w3-right">Text</span>
+  -->
+</div>
+
+</header>
+
+
+<div class="w3-container" id="id-header-placeholder">
+	<p>&nbsp;</p>
+</div>
+
+
+<div class="w3-display-container w3-theme-l4" style="overflow:auto; width:100%;" id="id-main">
+
+	<div class="w3-row-padding">
+
+		<div class="w3-col s12 m4 l3 w3-center w3-padding">
+
+			<div class="w3-card-4 w3-theme-l2 w3-padding w3-round-large">
+				<label class="w3-left w3-text-indigo">Matrix size:</label>
+				<select class="w3-select w3-margin-bottom" id="select_matrix_size" onchange="doOnChangeMatrixSize();">
+					<option value="7">7 x 7</option>
+					<option value="8">8 x 8</option>
+					<option value="9" selected>9 x 9</option>
+				</select>
+
+				<label class="w3-left w3-text-indigo">Characters:</label>
+				<select class="w3-select w3-margin-bottom" id="select_characters" onchange="doOnChangeCharacters();">
+					<option value="xo">X | O</option>
+					<option value="pb">p | b</option>
+					<option value="pbq" selected>p | b, q</option>
+				</select>
+
+				<label class="w3-left w3-text-indigo">Cellsize:</label>
+				<select class="w3-select w3-margin-bottom" id="select_cellsize" onchange="doOnChangeCellsize();">
+					<option value="40">40 pixel</option>
+					<option value="60">60 pixel</option>
+					<option value="80" selected>80 pixel</option>
+				</select>
+
+				<div class="w3-display-container w3-padding">&nbsp;
+					<div class="w3-display-left">
+						<input class="w3-check" type="checkbox" checked="checked" id="chk_highlight" onchange="doOnChangeHighlight();"><label class="w3-text-indigo">&nbsp;Higlight</label>
+					</div>
+				</div>
+
+				<div class="w3-display-container w3-padding">&nbsp;
+					<button id="thebutton" class="w3-display-right w3-button w3-theme-l1 w3-hover-blue w3-round w3-margin-bottom" onclick="doTest();">Generate</button>
+				</div>
+
+				<div id="placeofthemessage">&nbsp;</div>
+
+			</div>
+
+		</div>
+
+		<div class="w3-col s12 m8 l9 w3-center w3-padding" style="width:600px;" id="id_cell_container">
+
+			<div id="placeofthematrix" class="w3-card-4 w3-theme-l2 w3-padding w3-round-large">
+			</div>
+
+		</div>
+
+	</div>
+
+</div>
+
+<div class="w3-container" id="id-footer-placeholder">
+	<p>&nbsp;</p>
+</div>
+
+
+<footer class="w3-container w3-theme-l3 w3-bottom" id="id-footer">
+  <p>Footer</p>
+</footer>
+
+
+</body>
+</html>
