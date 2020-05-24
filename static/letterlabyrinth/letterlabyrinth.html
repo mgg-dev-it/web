@@ -61,6 +61,7 @@
 		let fontsize = 16;
 		doc.setFont("helvetica");
 		doc.setFontSize(fontsize);
+		doc.setLineWidth(0.1);
 
 		let m = getLastMatrix();
 
@@ -70,6 +71,9 @@
 		let x = 55 - (width / 2);
 		let y = 52 - (width / 2);
 		
+		let startCell = getStartCell();
+		let endCell = getEndCell();
+
 		for(let iRow=0; iRow<m.length; iRow++){
 			//let s = '[' + m[iRow].join('][') + ']';
 			//doc.text(s, 15, 20 + 7 * iRow);
@@ -79,22 +83,24 @@
 				if(iRow == 0){
 					doc.line(x + cellwidth * iCol, y, x + cellwidth * iCol, y + width);
 				}
+				if((startCell.row == iRow && startCell.col == iCol) || (endCell.row == iRow && endCell.col == iCol)){
+					doc.setFillColor(208);
+					doc.rect(x + cellwidth * iCol + 1, y + cellwidth * iRow + 1, cellwidth - 2, cellwidth - 2, "F");
+				}
 				doc.text(m[iRow][iCol].toLowerCase(), x + cellwidth * iCol + cellwidth / 2 - 2, y + cellwidth * iRow + cellwidth / 2 + 1);
 			}
 		}
 		doc.line(x, y + cellwidth * m.length, x + width, y + cellwidth * m.length);
 		doc.line(x + cellwidth * m.length, y, x + cellwidth * m.length, y + width);
 		
-		doc.setLineWidth(0.1);
-		//doc.line(20, 30, 60, 30);
-		doc.line(5, 5, 205, 5); //top
-		doc.line(205, 5, 205, 292); //right
-		doc.line(5, 5, 5, 292); //left
-		doc.line(5, 292, 205, 292); //bottom
+		// doc.line(5, 5, 205, 5); //top
+		// doc.line(205, 5, 205, 292); //right
+		// doc.line(5, 5, 5, 292); //left
+		// doc.line(5, 292, 205, 292); //bottom
 
-		doc.line(5, 100, 205, 100); //third
-		doc.line(5, 196, 205, 196); //two third
-		doc.line(105, 5, 105, 292); //half
+		// doc.line(5, 100, 205, 100); //third
+		// doc.line(5, 196, 205, 196); //two third
+		// doc.line(105, 5, 105, 292); //half
 
 
 		//doc.text("PDF test", 35, 25);

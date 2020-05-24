@@ -450,6 +450,14 @@ function getLastMatrix(){
     return last_matrix;
 }
 
+function getStartCell(){
+    return startCell;
+}
+
+function getEndCell(){
+    return endCell;
+}
+
 function generateEmptyHTML(p_matrix_width, p_matrix_height, cellsize) {
     matrix_width = p_matrix_width;
     matrix_height = p_matrix_height;
