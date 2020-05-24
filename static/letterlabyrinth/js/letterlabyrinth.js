@@ -446,6 +446,10 @@ function getLastMatrixHTML(cellsize, highlight) {
     return retHTML;
 }
 
+function getLastMatrix(){
+    return last_matrix;
+}
+
 function generateEmptyHTML(p_matrix_width, p_matrix_height, cellsize) {
     matrix_width = p_matrix_width;
     matrix_height = p_matrix_height;
