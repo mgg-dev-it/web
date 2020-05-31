@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <title>Letter Labyrinth</title>
+<!--<meta charset="UTF-8">-->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <!--
@@ -20,8 +21,11 @@
 	h5,
 	h6 {
 		font-family: Arial, Helvetica, sans-serif;
-		font-size: 18px;
+		font-size: 16px;
 	}
+	.border-blue{border: 1px solid #000088;}
+	.margin-bottom-4{margin-bottom:4px}
+	.padding-4{padding: 4px;}
 </style>
 
 <!--
@@ -29,12 +33,12 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.1.1/pdfobject.js"></script>
 -->
 
-<script type="text/javascript" src="./js/jspdf.min.js"></script>
+<!--<script type="text/javascript" src="./js/jspdf.min.js"></script>-->
+<script type="text/javascript" src="./js/jspdf.debug.js"></script>
 <script type="text/javascript" src="./js/pdfobject.js"></script>
 
 
 <script type="text/javascript">
-	//doResize();
 	function doResize() {
 		document.getElementById("id-header-placeholder").style.height = document.getElementById("id-header").offsetHeight + "px";
 		document.getElementById("id-footer-placeholder").style.height = document.getElementById("id-footer").offsetHeight + "px";
@@ -44,7 +48,7 @@
 	};
 	function doOnLoad() {
 		doResize();
-		doTest();
+		doThePlay();
 		//PDFObject.embed("./document.pdf", "#pdfpreview");
 	};
 	window.addEventListener("resize", doResize);
@@ -55,8 +59,13 @@
 <script type="text/javascript" src="./js/letterlabyrinth.js"></script>
 
 <script type="text/javascript">
+	var matrix = null;
+	var matrices = [null, null, null, null, null, null];
 	function doPdfPreview() {
 		let doc = new jsPDF();
+
+
+		//doc.line(10, 10, 100, 100);
 
 		let fontsize = 16;
 		doc.setFont("helvetica");
@@ -93,61 +102,35 @@
 		doc.line(x, y + cellwidth * m.length, x + width, y + cellwidth * m.length);
 		doc.line(x + cellwidth * m.length, y, x + cellwidth * m.length, y + width);
 		
-		// doc.line(5, 5, 205, 5); //top
-		// doc.line(205, 5, 205, 292); //right
-		// doc.line(5, 5, 5, 292); //left
-		// doc.line(5, 292, 205, 292); //bottom
-
-		// doc.line(5, 100, 205, 100); //third
-		// doc.line(5, 196, 205, 196); //two third
-		// doc.line(105, 5, 105, 292); //half
-
-
-		//doc.text("PDF test", 35, 25);
-
-		//doc.line(20, 20, 60, 20); // horizontal line
-
-// doc.setLineWidth(0.5);
-// doc.line(20, 25, 60, 25);
-
-// doc.setLineWidth(1);
-// doc.line(20, 30, 60, 30);
-
-// doc.setLineWidth(1.5);
-// doc.line(20, 35, 60, 35);
-
-// doc.setDrawColor(255, 0, 0); // draw red lines
-
-// doc.setLineWidth(0.1);
-// doc.line(100, 20, 100, 60); // vertical line
-
-// doc.setLineWidth(0.5);
-// doc.line(105, 20, 105, 60);
-
-// doc.setLineWidth(1);
-// doc.line(110, 20, 110, 60);
-
-// doc.setLineWidth(1.5);
-// doc.line(115, 20, 115, 60);
-
-// doc.text(10, 110, "setLineDash");
-
-// doc.setLineWidth(0.1);
-// doc.setDrawColor(0, 0, 0);
-
-// doc.setLineDash([2.5]);
-// doc.line(10, 120, 200, 120);
-
-// doc.setLineDash([1, 1.5, 1, 1.5, 1, 1.5, 3, 2, 3, 2, 3, 2]);
-// doc.line(10, 125, 200, 125);
-
-// doc.setLineDash([1, 1.5, 1, 1.5, 1, 1.5, 3, 2, 3, 2, 3, 2], 7.5);
-// doc.line(10, 130, 200, 130); 		
-
-
 		PDFObject.embed(doc.output("bloburl"), "#pdfpreview");
-	}
-	function doTheJob() {
+		//PDFObject.embed(doc.output(""), "#pdfpreview");
+	};
+	function doTheFactorySlave(){
+		let ms = parseInt(document.getElementById("select_matrix_size").value);
+		let ch = document.getElementById("select_characters").value;
+		let cs = parseInt(document.getElementById("select_cellsize").value);
+		let highlight = document.getElementById("chk_highlight").checked;
+		let msg = document.getElementById("placeofthemessage");
+		for(let i=0; i<6; i++){
+			//document.getElementById("placeofthemessage").innerHTML = 'Please wait ... ' + (i + 1);
+			msg.innerHTML = 'Please wait ... ' + (i + 1);
+			//console.log(i + 1);
+			matrices[i] = generateHTML(ms, ms, ch, cs, highlight);
+			document.getElementById("placeofmatrix" + (i + 1)).innerHTML = getLastMatrixHTML(cs, highlight);
+		}
+		msg.innerHTML = '&nbsp;';
+		document.getElementById("button-factory").disabled = false;
+	};
+	function doTheFactory(){
+		document.getElementById("button-factory").disabled = true;
+		document.getElementById("placeofthemessage").innerHTML = 'Please wait ...';
+		// for(let i=0; i<6; i++){
+		// 	document.getElementById("placeofthemessage").innerHTML = 'Please wait ... ' + (i + 1);
+		// 	setTimeout(() => doTheFactorySlave(i), 100);
+		// }
+		setTimeout(() => doTheFactorySlave(), 300);
+	};
+	function doThePlaySlave() {
 		let ms = parseInt(document.getElementById("select_matrix_size").value);
 		let ch = document.getElementById("select_characters").value;
 		let cs = parseInt(document.getElementById("select_cellsize").value);
@@ -155,16 +138,16 @@
 		document.getElementById("placeofthematrix").innerHTML = generateHTML(ms, ms, ch, cs, highlight);
 		doPdfPreview();
 		document.getElementById("placeofthemessage").innerHTML = '&nbsp;';
-		document.getElementById("placeofthemessage").disabled = false;
-	}
-	function doTest() {
-		document.getElementById("placeofthemessage").disabled = true;
+		document.getElementById("thebutton").disabled = false;
+	};
+	function doThePlay() {
+		document.getElementById("thebutton").disabled = true;
 		let ms = parseInt(document.getElementById("select_matrix_size").value);
 		let cs = parseInt(document.getElementById("select_cellsize").value);
 		document.getElementById("placeofthematrix").innerHTML = generateEmptyHTML(ms, ms, cs);
 		document.getElementById("id_cell_container").style.width = '' + (cs * ms + 83) + 'px';
 		document.getElementById("placeofthemessage").innerHTML = 'Please wait ...';
-		setTimeout(() => doTheJob(), 100);
+		setTimeout(() => doThePlaySlave(), 300);
 	};
 	function doOnChangeMatrixSize() {
 		let ms = parseInt(document.getElementById("select_matrix_size").value);
@@ -190,7 +173,18 @@
 		let highlight = document.getElementById("chk_highlight").checked;
 		document.getElementById("placeofthematrix").innerHTML = getLastMatrixHTML(cs, highlight);
 	};
+	function doOnChangeMode(mode){
+		let ms = parseInt(document.getElementById("select_matrix_size").value);
+		let cs = parseInt(document.getElementById("select_cellsize").value);
+		//let mode = document.getElementsByName("select-mode").value;
+		//console.log(mode);
+		document.getElementById("placeofthematrix").style.display = (mode == "play" ? "block" : "none"); 
+		document.getElementById("placeofsixmatrix").style.display = (mode == "factory" ? "block" : "none");
+		//document.getElementById("id_cell_container").style.width = '' + (cs * ms + 83) + 'px';
+		document.getElementById("id_cell_container").style.width = '' + (mode == "play" ? (cs * ms + 83) : (cs * ms * 2 + 90))  + 'px';
+	};
 </script>
+
 
 <body class="w3-theme-l5">
 
@@ -243,9 +237,9 @@
 
 			<div class="w3-col s12 m4 l2 w3-center w3-padding">
 
-				<div class="w3-card-4 w3-theme-l2 w3-padding w3-round-large">
+				<div class="w3-card-4 w3-theme-l2 w3-padding w3-round-large"> <!-- w3-theme-l2 -->
 					<label class="w3-left w3-text-indigo">Matrix size:</label>
-					<select class="w3-select w3-margin-bottom" id="select_matrix_size"
+					<select class="w3-select margin-bottom-4 border-blue" style="padding: 0px;" id="select_matrix_size"
 						onchange="doOnChangeMatrixSize();">
 						<option value="7">7 x 7</option>
 						<option value="8">8 x 8</option>
@@ -253,18 +247,31 @@
 					</select>
 
 					<label class="w3-left w3-text-indigo">Characters:</label>
-					<select class="w3-select w3-margin-bottom" id="select_characters" onchange="doOnChangeCharacters();">
+					<select class="w3-select margin-bottom-4 border-blue" style="padding: 0px;" id="select_characters" onchange="doOnChangeCharacters();">
 						<option value="xo">X | O</option>
 						<option value="pb">p | b</option>
 						<option value="pbq" selected>p | b, q</option>
 					</select>
 
 					<label class="w3-left w3-text-indigo">Cellsize:</label>
-					<select class="w3-select w3-margin-bottom" id="select_cellsize" onchange="doOnChangeCellsize();" disabled>
-						<option value="40" selected>40 pixel</option>
+					<select class="w3-select margin-bottom-4 border-blue" style="padding: 0px;" id="select_cellsize" onchange="doOnChangeCellsize();">
+						<option value="20">20 pixel</option>
+						<option value="30" selected>30 pixel</option>
+						<option value="40">40 pixel</option>
+						<option value="50">50 pixel</option>
 						<option value="60">60 pixel</option>
+						<option value="70">70 pixel</option>
 						<option value="80">80 pixel</option>
+						<option value="90">90 pixel</option>
 					</select>
+
+					<div class="w3-display-container">&nbsp;
+						<fieldset class="border-blue" style="width: 100%;">
+							<legend class="w3-text-indigo">&nbsp;Mode&nbsp;</legend>
+							<input class="w3-radio" type="radio" name="select-mode" value="play" checked="checked" onchange="doOnChangeMode('play');"><label>&nbsp;Play&nbsp;&nbsp;&nbsp;</label>
+							<input class="w3-radio" type="radio" name="select-mode" value="factory" onchange="doOnChangeMode('factory');"><label>&nbsp;Factory</label>
+						</fieldset>
+					</div>
 
 					<div class="w3-display-container w3-padding">&nbsp;
 						<div class="w3-display-left">
@@ -273,7 +280,11 @@
 					</div>
 
 					<div class="w3-display-container w3-padding">&nbsp;
-						<button id="thebutton" class="w3-display-right w3-button w3-theme-l1 w3-hover-blue w3-round w3-margin-bottom" onclick="doTest();">Generate</button>
+						<button id="thebutton" class="w3-display-right w3-button w3-theme-l1 w3-hover-blue w3-round w3-margin-bottom" onclick="doThePlay();">Generate</button>
+					</div>
+
+					<div class="w3-display-container w3-padding">&nbsp;
+						<button id="button-factory" class="w3-display-right w3-button w3-theme-l1 w3-hover-blue w3-round w3-margin-bottom" onclick="doTheFactory();">Generate 6</button>
 					</div>
 
 					<div id="placeofthemessage">&nbsp;</div>
@@ -286,6 +297,23 @@
 			<div class="w3-col s12 m8 l6 w3-center w3-padding" id="id_cell_container">
 
 				<div id="placeofthematrix" class="w3-card-4 w3-theme-l2 w3-padding w3-round-large">
+				</div>
+
+				<div id="placeofsixmatrix" class="w3-card-4 w3-theme-l2 w3-round-large" style="display:none">
+					<!-- <div class="w3-display-container"> -->
+						<div class="w3-cell-row">
+							<div id="placeofmatrix1" class="w3-cell padding-4">1</div>
+							<div id="placeofmatrix2" class="w3-cell padding-4">2</div>
+						</div>
+						<div class="w3-cell-row">
+							<div id="placeofmatrix3" class="w3-cell padding-4">3</div>
+							<div id="placeofmatrix4" class="w3-cell padding-4">4</div>
+						</div>
+						<div class="w3-cell-row">
+							<div id="placeofmatrix5" class="w3-cell padding-4">5</div>
+							<div id="placeofmatrix6" class="w3-cell padding-4">6</div>
+						</div>
+					<!-- </div> -->
 				</div>
 
 			</div>
