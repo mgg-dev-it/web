@@ -72,11 +72,15 @@
 	var playMatrix = null;
 	var playStartCell = null;
 	var playEndCell = null;
+	var playHash = null;
 	var matrices = [null, null, null, null, null, null];
 	var startCells = [null, null, null, null, null, null];
 	var endCells = [null, null, null, null, null, null];
+	var hashes = [null, null, null, null, null, null];
+	var pdfdoc = null;
+	var filename = null;
 
-	function drawOneMatrix(doc, px, py, width, cellwidth, m, startCell, endCell){
+	function drawOneMatrix(doc, px, py, width, cellwidth, m, startCell, endCell, hash){
 		let x = px - (width / 2);
 		let y = py - (width / 2);
 		for(let iRow=0; iRow<m.length; iRow++){
@@ -100,6 +104,7 @@
 	function clearPdfPreview() {
 		let doc = new jsPDF();
 		PDFObject.embed(doc.output("bloburl"), "#pdfpreview");
+		pdfdoc = doc;
 	};
 
 	function doPdfPreview() {
@@ -122,46 +127,86 @@
 		let x = 55 - (width / 2);
 		let y = 52 - (width / 2);
 		
+		let footer = getCurrentDateTimeFormatted() + " ";
+
 		clearPdfPreview();
 		if(document.getElementById("radio-play").checked){
-			if(playMatrix != null) drawOneMatrix(doc, 55, 52, width, cellwidth, playMatrix, playStartCell, playEndCell)
+			if(playMatrix != null){
+				drawOneMatrix(doc, 55, 52, width, cellwidth, playMatrix, playStartCell, playEndCell);
+				footer += playHash;
+				doc.setFontSize(10);
+				doc.text(footer, 15, 290);
+			}
+			else {
+				footer = "";
+			}
 		}
 		if(document.getElementById("radio-factory").checked){
-			if(matrices[0] != null) drawOneMatrix(doc, 57, 55, width, cellwidth, matrices[0], startCells[0], endCells[0]);
-			if(matrices[1] != null) drawOneMatrix(doc, 153, 55, width, cellwidth, matrices[1], startCells[1], endCells[1]);
-			if(matrices[2] != null) drawOneMatrix(doc, 57, 147, width, cellwidth, matrices[2], startCells[2], endCells[2]);
-			if(matrices[3] != null) drawOneMatrix(doc, 153, 147, width, cellwidth, matrices[3], startCells[3], endCells[3]);
-			if(matrices[4] != null) drawOneMatrix(doc, 57, 240, width, cellwidth, matrices[4], startCells[4], endCells[4]);
-			if(matrices[5] != null) drawOneMatrix(doc, 153, 240, width, cellwidth, matrices[5], startCells[5], endCells[5]);
-			// for(let i=0; i<6; i++){
-			// 	drawOneMatrix(doc, x, y, width, cellwidth, matrices[i], startCells[i], endCells[i])
-			// }
+			if(matrices[0] != null) drawOneMatrix(doc, 57, 55, width, cellwidth, matrices[0], startCells[0], endCells[0], hashes[0]);
+			if(matrices[1] != null) drawOneMatrix(doc, 153, 55, width, cellwidth, matrices[1], startCells[1], endCells[1], hashes[1]);
+			if(matrices[2] != null) drawOneMatrix(doc, 57, 147, width, cellwidth, matrices[2], startCells[2], endCells[2], hashes[2]);
+			if(matrices[3] != null) drawOneMatrix(doc, 153, 147, width, cellwidth, matrices[3], startCells[3], endCells[3], hashes[3]);
+			if(matrices[4] != null) drawOneMatrix(doc, 57, 240, width, cellwidth, matrices[4], startCells[4], endCells[4], hashes[4]);
+			if(matrices[5] != null) drawOneMatrix(doc, 153, 240, width, cellwidth, matrices[5], startCells[5], endCells[5], hashes[5]);
+			let first = true;
+			let found = false;
+			for (let i=0; i<6; i++){
+				if (hashes[i]){
+					footer += (first? "" : " - ") + hashes[i];
+					first = false;
+					found = true;
+				}
+			}
+			if(found){
+				doc.setFontSize(10);
+				doc.text(footer, 15, 290);
+			}
+			else {
+				footer = "";
+			}
 		}
 
-		// let m = getLastMatrix();
-		// let startCell = getStartCell();
-		// let endCell = getEndCell();
-
-		// for(let iRow=0; iRow<m.length; iRow++){
-		// 	doc.line(x, y + cellwidth * iRow, x + width, y + cellwidth * iRow);
-		// 	let mr = m[iRow];
-		// 	for(let iCol=0;iCol<mr.length; iCol++){
-		// 		if(iRow == 0){
-		// 			doc.line(x + cellwidth * iCol, y, x + cellwidth * iCol, y + width);
-		// 		}
-		// 		if((startCell.row == iRow && startCell.col == iCol) || (endCell.row == iRow && endCell.col == iCol)){
-		// 			doc.setFillColor(208);
-		// 			doc.rect(x + cellwidth * iCol + 1, y + cellwidth * iRow + 1, cellwidth - 2, cellwidth - 2, "F");
-		// 		}
-		// 		doc.text(m[iRow][iCol].toLowerCase(), x + cellwidth * iCol + cellwidth / 2 - 2, y + cellwidth * iRow + cellwidth / 2 + 1);
-		// 	}
-		// }
-		// doc.line(x, y + cellwidth * m.length, x + width, y + cellwidth * m.length);
-		// doc.line(x + cellwidth * m.length, y, x + cellwidth * m.length, y + width);
-		
+		//filename = footer.replace(/\./g, "").replace(/:/g, "").replace(" - ", "-").replace(/\s/g, "_");
+		filename = footer.replace(/\./g, "").replace(/:/g, "").replace(/ - /g, "-").replace(/\s/g, "_");
+		document.getElementById("input-filename").value = filename;
 		PDFObject.embed(doc.output("bloburl"), "#pdfpreview");
+		pdfdoc = doc;
 	};
 
+	function getCurrentDateTimeFormatted(){
+		let d = new Date();
+		let year = d.getFullYear();
+		let month = d.getMonth() + 1;
+		let day = d.getDate();
+		let hour = d.getHours();
+		let minute = d.getMinutes();
+		let second = d.getSeconds();
+		let retval = year + "." + (month<10 ? "0" + month : month) + "." + (day<10 ? "0" + day : day) + " " + hour + ":" + (minute<10 ? "0" + minute : minute)+ ":" + (second<10 ? "0" + second : second);
+		return(retval);
+	};
+
+	function disableControls(){
+		document.getElementById("select_matrix_size").disabled = true;
+		document.getElementById("select_characters").disabled = true;
+		document.getElementById("select_cellsize").disabled = true;
+		document.getElementById("chk_highlight").disabled = true;
+		document.getElementById("input-filename").disabled = true;
+		document.getElementById("fieldset-mode").disabled = true;
+		document.getElementById("thebutton").disabled = true;
+		document.getElementById("btn-save").disabled = true;
+		document.getElementById("placeofthemessage").innerHTML = 'Please wait ...';
+	};
+	function enableControls(){
+		document.getElementById("select_matrix_size").disabled = false;
+		document.getElementById("select_characters").disabled = false;
+		document.getElementById("select_cellsize").disabled = false;
+		document.getElementById("chk_highlight").disabled = false;
+		document.getElementById("input-filename").disabled = false;
+		document.getElementById("fieldset-mode").disabled = false;
+		document.getElementById("thebutton").disabled = false;
+		document.getElementById("btn-save").disabled = false;
+		document.getElementById("placeofthemessage").innerHTML = '&nbsp;';
+	};
 	function checkFactoryCompleted(){
 		let ok = true;
 		if (matrices[0] == null) ok = false;
@@ -172,9 +217,7 @@
 		if (matrices[5] == null) ok = false;
 		if (ok){
 			doPdfPreview();
-			document.getElementById("placeofthemessage").innerHTML = '&nbsp;';
-			document.getElementById("thebutton").disabled = false;
-			document.getElementById("fieldset-mode").disabled = false;
+			enableControls();
 		}
 	};
 	function doTheFactorySlave(i){
@@ -188,6 +231,7 @@
 		matrices[i] = getLastMatrix();
 		startCells[i] = getStartCell();
 		endCells[i] = getEndCell();
+		hashes[i] = calculateHash(matrices[i], startCells[i], endCells[i], ch);
 		checkFactoryCompleted();
 	};
 	function clearFactory(){
@@ -202,27 +246,12 @@
 		clearPdfPreview();
 	};
 	function doTheFactory(){
-		document.getElementById("thebutton").disabled = true;
-		document.getElementById("fieldset-mode").disabled = true;
-		document.getElementById("placeofthemessage").innerHTML = 'Please wait ...';
+		disableControls();
 		clearFactory();
-		// let ms = parseInt(document.getElementById("select_matrix_size").value);
-		// let cs = parseInt(document.getElementById("select_cellsize").value);
-		// //document.getElementById("button-factory").disabled = true;
-		// //document.getElementById("placeofthemessage").innerHTML = 'Please wait ...';
-		// for(let i=0; i<6; i++){
-		// 	matrices[i] = null;
-		// 	document.getElementById("placeofmatrix" + (i + 1)).innerHTML = generateEmptyHTML(ms, ms, cs);
-		// }
 		for(let i=0; i<6; i++){
 			setTimeout(() => doTheFactorySlave(i), i * 100);
 		}
 	};
-	// function doTheFactoryxxx(){
-	// 	document.getElementById("button-factory").disabled = true;
-	// 	document.getElementById("placeofthemessage").innerHTML = 'Please wait ...';
-	// 	setTimeout(() => doTheFactory0(), 100);
-	// };
 	function doThePlaySlave() {
 		let ms = parseInt(document.getElementById("select_matrix_size").value);
 		let ch = document.getElementById("select_characters").value;
@@ -232,10 +261,10 @@
 		playMatrix = getLastMatrix();
 		playStartCell = getStartCell();
 		playEndCell = getEndCell();
+		playHash = calculateHash(playMatrix, playStartCell, playEndCell, ch);
 		doPdfPreview();
-		document.getElementById("placeofthemessage").innerHTML = '&nbsp;';
-		document.getElementById("thebutton").disabled = false;
-		document.getElementById("fieldset-mode").disabled = false;
+		// calculateHash(playMatrix, playStartCell, playEndCell, ch);
+		enableControls();
 	};
 	function clearPlay(){
 		let ms = parseInt(document.getElementById("select_matrix_size").value);
@@ -248,14 +277,15 @@
 		clearPdfPreview();
 	};
 	function doThePlay() {
-		document.getElementById("thebutton").disabled = true;
-		document.getElementById("fieldset-mode").disabled = true;
+		disableControls();
+		// document.getElementById("thebutton").disabled = true;
+		// document.getElementById("fieldset-mode").disabled = true;
 		clearPlay();
 		// let ms = parseInt(document.getElementById("select_matrix_size").value);
 		// let cs = parseInt(document.getElementById("select_cellsize").value);
 		// document.getElementById("placeofthematrix").innerHTML = generateEmptyHTML(ms, ms, cs);
 		// document.getElementById("id_cell_container").style.width = '' + (cs * ms + 83) + 'px';
-		document.getElementById("placeofthemessage").innerHTML = 'Please wait ...';
+		// document.getElementById("placeofthemessage").innerHTML = 'Please wait ...';
 		setTimeout(() => doThePlaySlave(), 300);
 	};
 	function doTheGeneration() {
@@ -263,10 +293,7 @@
 		if(document.getElementById("radio-factory").checked) doTheFactory();
 	};
 	function doTheGenerationOne(i){
-		document.getElementById("thebutton").disabled = true;
-		document.getElementById("fieldset-mode").disabled = true;
-		document.getElementById("placeofthemessage").innerHTML = 'Please wait ...';
-		//clearFactory();
+		disableControls();
 		setTimeout(() => doTheFactorySlave(i), i * 100);
 	};
 	function doOnChangeMatrixSize() {
@@ -275,6 +302,7 @@
 		document.getElementById("placeofthematrix").innerHTML = generateEmptyHTML(ms, ms, cs);
 		document.getElementById("id_cell_container").style.width = '' + (cs * ms + 83) + 'px';
 		clearPdfPreview();
+		document.getElementById("id_cell_container").style.width = '' + (document.getElementById("radio-play").checked ? (cs * ms + 83) : (cs * ms * 2 + 90))  + 'px';
 	};
 	function doOnChangeCharacters() {
 		let ms = parseInt(document.getElementById("select_matrix_size").value);
@@ -296,11 +324,22 @@
 		clearPlay();
 		clearFactory();
 		clearPdfPreview();
+		document.getElementById("id_cell_container").style.width = '' + (document.getElementById("radio-play").checked ? (cs * ms + 83) : (cs * ms * 2 + 90))  + 'px';
 	};
 	function doOnChangeHighlight() {
 		let cs = parseInt(document.getElementById("select_cellsize").value);
 		let highlight = document.getElementById("chk_highlight").checked;
-		document.getElementById("placeofthematrix").innerHTML = getLastMatrixHTML(cs, highlight);
+		// if (document.getElementById("radio-play").checked){
+			//document.getElementById("placeofthematrix").innerHTML = getLastMatrixHTML(cs, highlight);
+			document.getElementById("placeofthematrix").innerHTML = createHTMLFromMatrix(playMatrix, playStartCell, playEndCell, cs, highlight);
+		// }
+		// else{
+			for(let i=0; i<6; i++){
+				//document.getElementById("placeofmatrix" + (i + 1)).innerHTML = generateHTML(ms, ms, ch, cs, highlight);
+				document.getElementById("placeofmatrix" + (i + 1)).innerHTML = createHTMLFromMatrix(matrices[i], startCells[i], endCells[i], cs, highlight);
+			}
+		// }
+
 	};
 	function doOnChangeMode(mode){
 		let ms = parseInt(document.getElementById("select_matrix_size").value);
@@ -312,6 +351,45 @@
 		//document.getElementById("id_cell_container").style.width = '' + (cs * ms + 83) + 'px';
 		document.getElementById("id_cell_container").style.width = '' + (mode == "play" ? (cs * ms + 83) : (cs * ms * 2 + 90))  + 'px';
 		doPdfPreview();
+	};
+	function doSave(){
+		let filename = document.getElementById("input-filename").value;
+		filename = filename || "letterlabyrinth";
+		if (!filename.toLowerCase().endsWith(".pdf")){
+			if(!filename.endsWith(".")) filename += ".";
+			filename += "pdf";
+		}
+		pdfdoc.save(filename);
+	};
+	function calculateHash(m, sc, ec, ch){
+		let charset = "ABCDEFGHIJKLMNOPQRSTUXYVWZ0123456789";
+		let numchars = charset.length;
+		let hashlength = 6;
+		let hashlimit = Math.pow(numchars, hashlength);
+		console.log(hashlimit);
+		//console.log("---");
+		//console.log(36 * 36 * 36 * 36 * 36 * 36); //2_176_782_336
+		let hash = 1;
+		for(let iRow=0; iRow<m.length; iRow++){
+			let mr = m[iRow];
+			for(let iCol=0;iCol<mr.length; iCol++){
+				if (mr[iCol] == ch.substring(0, 1) || (sc.row == iRow && sc.col == iCol) || (ec.row == iRow && ec.col == iCol)){
+					hash *= (iRow * mr.length + iCol + 1);
+					//console.log(iRow + " " + iCol + " " + (iRow * mr.length + iCol) + " " + hash);
+				}
+			}
+		}
+		if (hash >= hashlimit){
+			hash = hash % hashlimit;
+		}
+		let result = "";
+		for (let i = hashlength; i > 0; i--){
+			let t = hash % numchars;
+			result = charset.substring(t, t + 1) + result;
+			hash = hash / numchars;
+		}
+		//console.log(result);
+		return(result);
 	};
 </script>
 
@@ -377,14 +455,14 @@
 					</select>
 
 					<label class="w3-left w3-text-indigo">Characters:</label>
-					<select class="w3-select margin-bottom-4 border-blue" style="padding: 0px;" id="select_characters" onchange="doOnChangeCharacters();">
+					<select class="w3-select margin-bottom-4 border-blue padding-0" id="select_characters" onchange="doOnChangeCharacters();">
 						<option value="xo">X | O</option>
 						<option value="pb">p | b</option>
 						<option value="pbq" selected>p | b, q</option>
 					</select>
 
 					<label class="w3-left w3-text-indigo">Cellsize:</label>
-					<select class="w3-select margin-bottom-4 border-blue" style="padding: 0px;" id="select_cellsize" onchange="doOnChangeCellsize();">
+					<select class="w3-select margin-bottom-4 border-blue padding-0" id="select_cellsize" onchange="doOnChangeCellsize();">
 						<option value="20">20 pixel</option>
 						<option value="30" selected>30 pixel</option>
 						<option value="40">40 pixel</option>
@@ -411,6 +489,13 @@
 
 					<div class="w3-display-container w3-padding">&nbsp;
 						<button id="thebutton" class="w3-display-right w3-button w3-theme-l1 w3-hover-blue w3-round w3-margin-bottom" onclick="doTheGeneration();">Generate</button>
+					</div>
+
+					<label class="w3-left w3-text-indigo">Filename:</label>
+					<input class="w3-input  margin-bottom-4 padding-0" type="input" id="input-filename">
+
+					<div class="w3-display-container w3-padding">&nbsp;
+						<button id="btn-save" class="w3-display-right w3-button w3-theme-l1 w3-hover-blue w3-round w3-margin-bottom" onclick="doSave();">Save</button>
 					</div>
 
 					<!-- <div class="w3-display-container w3-padding">&nbsp;

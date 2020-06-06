@@ -436,13 +436,13 @@ function generateHTML(p_matrix_width, p_matrix_height, p_characters, cellsize, h
     let m = generateMatrix(p_matrix_width, p_matrix_height, p_characters);
     last_matrix = m;
     let retHTML = '';
-    if (m != null) retHTML = createHTMLFromMatrix(m, cellsize, highlight);
+    if (m != null) retHTML = createHTMLFromMatrix(m, startCell, endCell, cellsize, highlight);
     return retHTML;
 }
 
 function getLastMatrixHTML(cellsize, highlight) {
     let retHTML = '';
-    if (last_matrix != null) retHTML = createHTMLFromMatrix(last_matrix, cellsize, highlight);
+    if (last_matrix != null) retHTML = createHTMLFromMatrix(last_matrix, startCell, endCell, cellsize, highlight);
     return retHTML;
 }
 
@@ -478,7 +478,7 @@ function generateEmptyHTML(p_matrix_width, p_matrix_height, cellsize) {
     endCell = new Cell(-1, -1);
 
     let retHTML = '';
-    if (m != null) retHTML = createHTMLFromMatrix(m, cellsize);
+    if (m != null) retHTML = createHTMLFromMatrix(m, startCell, endCell, cellsize);
     return retHTML;
 }
 
@@ -486,27 +486,27 @@ function test(param) {
     return param;
 }
 
-function createHTMLFromMatrix(m, cellsize, highlight) {
+function createHTMLFromMatrix(m, sc, ec, cellsize, highlight) {
     let retHTML = '';
     retHTML += `<div style="display:grid; grid-template-columns: repeat(${matrix_width}, ${cellsize}px); grid-template-rows: repeat(${matrix_height}, ${cellsize}px); width:${matrix_width*cellsize+20}px; height:${matrix_width*cellsize+20}px; padding:10px; background:white; border-radius:4px">`;
     for (let iRow = 0; iRow < matrix_height; iRow++) {
         if (iRow > 0) retHTML += '\n';
         for (let iCol = 0; iCol < matrix_width; iCol++) {
             let border_left = " border-left: 1px solid grey; ";
-            if (startCell && iCol == 0 && iRow == startCell.row && iCol == startCell.col) border_left = " border-left: 5px solid grey; ";
-            if (endCell && iCol == 0 && iRow == endCell.row && iCol == endCell.col) border_left = " border-left: 5px solid grey; ";
+            if (sc && iCol == 0 && iRow == sc.row && iCol == sc.col) border_left = " border-left: 5px solid grey; ";
+            if (ec && iCol == 0 && iRow == ec.row && iCol == ec.col) border_left = " border-left: 5px solid grey; ";
 
             let border_top = " border-top: 1px solid grey; ";
-            if (startCell && iRow == 0 && iRow == startCell.row && iCol == startCell.col) border_top = " border-top: 5px solid grey; ";
-            if (endCell && iRow == 0 && iRow == endCell.row && iCol == endCell.col) border_top = " border-top: 5px solid grey; ";
+            if (sc && iRow == 0 && iRow == sc.row && iCol == sc.col) border_top = " border-top: 5px solid grey; ";
+            if (ec && iRow == 0 && iRow == ec.row && iCol == ec.col) border_top = " border-top: 5px solid grey; ";
 
             let border_right = (iCol == matrix_width-1) ? " border-right: 1px solid grey; " : "";
-            if (startCell && iCol == matrix_width-1 && iRow == startCell.row && iCol == startCell.col) border_right = " border-right: 5px solid grey; ";
-            if (endCell && iCol == matrix_width-1 && iRow == endCell.row && iCol == endCell.col) border_right = " border-right: 5px solid grey; ";
+            if (sc && iCol == matrix_width-1 && iRow == sc.row && iCol == sc.col) border_right = " border-right: 5px solid grey; ";
+            if (ec && iCol == matrix_width-1 && iRow == ec.row && iCol == ec.col) border_right = " border-right: 5px solid grey; ";
 
             let border_bottom = (iRow == matrix_height-1) ? " border-bottom: 1px solid grey; " : "";
-            if (startCell && iRow == matrix_height-1 && iRow == startCell.row && iCol == startCell.col) border_bottom = " border-bottom: 5px solid grey; ";
-            if (endCell && iRow == matrix_height-1 && iRow == endCell.row && iCol == endCell.col) border_bottom = " border-bottom: 5px solid grey; ";
+            if (sc && iRow == matrix_height-1 && iRow == sc.row && iCol == sc.col) border_bottom = " border-bottom: 5px solid grey; ";
+            if (ec && iRow == matrix_height-1 && iRow == ec.row && iCol == ec.col) border_bottom = " border-bottom: 5px solid grey; ";
 
             let border = border_left + border_top + border_right + border_bottom;
             let background = highlight && characters && characters.length>0 && m[iRow][iCol].toLowerCase() == characters[0].toLowerCase() ? "background:orange;" : "";
