@@ -105,6 +105,7 @@
 		let doc = new jsPDF();
 		PDFObject.embed(doc.output("bloburl"), "#pdfpreview");
 		pdfdoc = doc;
+		document.getElementById("input-filename").value = "";
 	};
 
 	function doPdfPreview() {
@@ -129,6 +130,9 @@
 		
 		let footer = getCurrentDateTimeFormatted() + "   ";
 
+		let characters = document.getElementById("select_characters").value;
+		characters = characters.substring(0, 1) + "|" + characters.substring(1);
+		
 		clearPdfPreview();
 		if(document.getElementById("radio-play").checked){
 			if(playMatrix != null){
@@ -136,6 +140,8 @@
 				footer += playHash;
 				doc.setFontSize(10);
 				doc.text(footer, 15, 290);
+				doc.setFontSize(16);
+				doc.text(characters, 195 - doc.getTextWidth(characters), 290);
 			}
 			else {
 				footer = "";
@@ -160,6 +166,8 @@
 			if(found){
 				doc.setFontSize(10);
 				doc.text(footer, 15, 290);
+				doc.setFontSize(16);
+				doc.text(characters, 195 - doc.getTextWidth(characters), 290);
 			}
 			else {
 				footer = "";
@@ -302,6 +310,8 @@
 		let cs = parseInt(document.getElementById("select_cellsize").value);
 		document.getElementById("placeofthematrix").innerHTML = generateEmptyHTML(ms, ms, cs);
 		document.getElementById("id_cell_container").style.width = '' + (cs * ms + 83) + 'px';
+		clearPlay();
+		clearFactory();
 		clearPdfPreview();
 		document.getElementById("id_cell_container").style.width = '' + (document.getElementById("radio-play").checked ? (cs * ms + 83) : (cs * ms * 2 + 90))  + 'px';
 	};
@@ -457,7 +467,7 @@
 
 					<label class="w3-left w3-text-indigo">Characters:</label>
 					<select class="w3-select margin-bottom-4 border-blue padding-0" id="select_characters" onchange="doOnChangeCharacters();">
-						<option value="xo">X | O</option>
+						<option value="xo">x | o</option>
 						<option value="pb">p | b</option>
 						<option value="pbq" selected>p | b, q</option>
 					</select>
@@ -487,7 +497,7 @@
 
 					<div class="w3-display-container w3-padding">&nbsp;
 						<div class="w3-display-left">
-							<input class="w3-check" type="checkbox" checked="checked" id="chk_highlight" onchange="doOnChangeHighlight();"><label class="w3-text-indigo">&nbsp;Higlight</label>
+							<input class="w3-check" type="checkbox" checked="checked" id="chk_highlight" onchange="doOnChangeHighlight();"><label for="chk_highlight" class="w3-text-indigo">&nbsp;Higlight</label>
 						</div>
 					</div>
 
