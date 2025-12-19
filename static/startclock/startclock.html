@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html>
+<title>Start Clock</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="./css/w3.css">
+<link rel="stylesheet" href="./css/w3-theme-blue.css">
+
+<style>
+	html,
+	body,
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 16px;
+	}
+	.border-blue{border: 1px solid #000088;}
+	.margin-bottom-4{margin-bottom:4px}
+	.padding-4{padding: 4px;}
+	.padding-0{padding: 0px;}
+	.padding-0-4{padding: 0px 4px;}
+
+#idDisplayClock {
+	font-size: 24px;
+	text-align: right;
+}
+
+div.settings {
+	/* display: flex; */
+	display: none;
+	justify-content: center;
+	align-items: center;
+	background: lightgray;
+	box-sizing: unset;
+	/* border: 2px solid red; */
+}
+
+div.display {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background: black;
+	box-sizing: unset;
+	/* border: 2px solid red; */
+}
+div.display_origin {
+	/* height: 78px; */
+	/* width: 380px; */
+	background: grey;
+	/* background: black; */
+	/* background: white; */
+	box-sizing: unset;
+	border: 2px solid red;
+}
+
+div.digit {
+	margin-top: 4px;
+  	margin-bottom: 4px;
+  	margin-left: 2px;
+  	margin-right: 2px;
+	display: inline-block;
+	height: 70px;
+	width: 52px;
+	position: relative;
+	/* box-sizing: unset */
+  /* transform: skew(170deg); */
+	/*border: 2px solid blue;*/
+}
+div.segA {
+	width: 16px;
+	border-top: 10px solid #333;
+	/* border-top: 10px solid red; */
+	border-right: 10px solid transparent;
+	border-left: 10px solid transparent;
+	/* border-radius: 5px; */
+	position: absolute;
+	left: 2px;
+}
+div.segB {
+	height: 16px;
+	border-top: 10px solid transparent;
+	border-right: 10px solid #333;
+	border-bottom: 5px solid transparent;
+	position: absolute;
+	top: 2px;
+	left: 30px
+}
+div.segC {
+	height: 16px;
+	border-top: 5px solid transparent;
+	border-right: 10px solid #333;
+	border-bottom: 10px solid transparent;
+	position: absolute;
+	top: 37px;
+	left: 30px
+}
+div.segD {
+	width: 16px;
+	border-bottom: 10px solid #333;
+	border-right: 10px solid transparent;
+	border-left: 10px solid transparent;
+	position: absolute;
+	left: 2px;
+	bottom: 0px;
+}
+div.segE {
+	height: 16px;
+	border-top: 5px solid transparent;
+	border-left: 10px solid #333;
+	border-bottom: 10px solid transparent;
+	position: absolute;
+	top: 37px;
+}
+div.segF {
+	height: 16px;
+	border-top: 10px solid transparent;
+	border-left: 10px solid #333;
+	border-bottom: 5px solid transparent;
+	position: absolute;
+	top: 2px;
+}
+div.segGTop {
+	width: 16px;
+	border-bottom: 5px solid #333;
+	border-right: 10px solid transparent;
+	border-left: 10px solid transparent;
+	position: absolute;
+	left: 2px;
+	top: 30px;
+}
+div.segGBottom {
+	width: 16px;
+	border-top: 5px solid #333;
+	border-right: 10px solid transparent;
+	border-left: 10px solid transparent;
+	position: absolute;
+	top: 35px;
+	left: 2px;
+}
+div.segH {
+	position: absolute;
+	top: 60px;
+	left: 42px;
+	border-radius: 5px; /*Makes it a circle*/
+	width: 10px;
+	height: 10px;
+  background: #333;
+}
+div.segI {
+	position: absolute;
+	top: 20px;
+	left: 42px;
+	border-radius: 5px; /*Makes it a circle*/
+	width: 10px;
+	height: 10px;
+  background: #333;
+}
+div.segJ {
+	position: absolute;
+	top: 40px;
+	left: 42px;
+	border-radius: 5px; /*Makes it a circle*/
+	width: 10px;
+	height: 10px;
+  background: #333;
+}
+</style>
+
+<script type="text/javascript" src="./js/7segmentdisplay.js"></script>
+
+<script type="text/javascript">
+
+	function constructDateFromParts(year, month, day, hour, minute, second) {
+		// normalize undefined/null to sensible defaults
+		var y = (year !== undefined && year !== null) ? Number(year) : 0;
+		var mo = (month !== undefined && month !== null) ? Number(month) : 1; // 1..12
+		var d = (day !== undefined && day !== null) ? Number(day) : 1;
+		var h = (hour !== undefined && hour !== null) ? Number(hour) : 0;
+		var mi = (minute !== undefined && minute !== null) ? Number(minute) : 0;
+		var s = (second !== undefined && second !== null) ? Number(second) : 0;
+
+		// convert to integers
+		y = Math.trunc(y);
+		mo = Math.trunc(mo);
+		d = Math.trunc(d);
+		h = Math.trunc(h);
+		mi = Math.trunc(mi);
+		s = Math.trunc(s);
+
+		// JavaScript Date months are 0-based
+		var dt = new Date(y, mo - 1, d, h, mi, s);
+
+		// if invalid date, return nullTime sentinel
+		// if (isNaN(dt.getTime())) return nullTime;
+		return dt;
+	}
+
+	function getCurrentDateTimeFormatted(){
+		let d = new Date();
+		let year = d.getFullYear();
+		let month = d.getMonth() + 1;
+		let day = d.getDate();
+		let hour = d.getHours();
+		let minute = d.getMinutes();
+		let second = d.getSeconds();
+		let retval = year + "." + (month<10 ? "0" + month : month) + "." + (day<10 ? "0" + day : day) + " " + hour + ":" + (minute<10 ? "0" + minute : minute)+ ":" + (second<10 ? "0" + second : second);
+		return(retval);
+	};
+
+	function createOscillator(frequency){
+		let audioContext = new AudioContext();
+		let gainNode = audioContext.createGain();
+		gainNode.connect(audioContext.destination);
+		gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+		let oscillatorNode = audioContext.createOscillator();
+		oscillatorNode.type = "square";
+		oscillatorNode.frequency.setValueAtTime(frequency, audioContext.currentTime);
+		oscillatorNode.connect(gainNode);
+		return {audioContext: audioContext, gainNode: gainNode, oscillatorNode: oscillatorNode};
+	}
+
+	const {audioContext: audioContext440, gainNode: gainNode440, oscillatorNode: oscillatorNode440} = createOscillator(440);
+	const {audioContext: audioContext880, gainNode: gainNode880, oscillatorNode: oscillatorNode880} = createOscillator(880);
+
+	var isAudioEnabled = false;
+	var isRun = false;
+	// var isBeeping = false;
+
+	const smoothingInterval = 0.02;
+	const beepLengthInSeconds = 0.3;
+
+	function beep440(){
+		if (!isAudioEnabled) return;
+		const now = audioContext440.currentTime;
+		gainNode440.gain.setTargetAtTime(1, now, smoothingInterval);
+		gainNode440.gain.setTargetAtTime(0, now + beepLengthInSeconds, smoothingInterval);
+	}
+
+	function beep880(){
+		if (!isAudioEnabled) return;
+		const now = audioContext880.currentTime;
+		gainNode880.gain.setTargetAtTime(1, now, smoothingInterval);
+		gainNode880.gain.setTargetAtTime(0, now + 3 * beepLengthInSeconds, smoothingInterval);
+	}
+
+	var isOscillatorStarted = false;
+
+	function doOnChangeAudio(){
+		isAudioEnabled  = document.getElementById("chk_audio").checked;
+		if (isAudioEnabled && !isOscillatorStarted){
+			oscillatorNode440.start();
+			oscillatorNode880.start();
+			isOscillatorStarted = true;
+		}
+	}
+
+	function doOnChangeRun(){
+		isRun  = document.getElementById("chk_run").checked;
+	}
+
+	//function doOnclickSettings(){
+	function doOnClickShow(){
+		let elementSettings = document.getElementById("id_settings");
+		let elementDisplay = document.getElementById("id_display");
+		elementSettings.style.display = "none";
+		elementDisplay.style.display = "flex";
+	}
+
+	function doOnclickDisplay(){
+		let elementSettings = document.getElementById("id_settings");
+		let elementDisplay = document.getElementById("id_display");
+		elementSettings.style.display = "block";
+		elementDisplay.style.display = "none";
+	}
+
+	// function doAudioResume(){
+	// 	if (!audioEnabled){
+	// 		oscillatorNode440.start();
+	// 		oscillatorNode880.start();
+	// 		audioEnabled = true;
+				// 	}
+	// 	isBeeping = true;
+	// }
+
+	// function doAudioSuspend(){
+	// 	isBeeping = false;
+	// }
+
+	// dark = "#333";
+	dark = "#111";
+	// dark = "black";
+	light = "red";
+	// light = "blue";
+
+	const digit0 = new Digit("d0", 52, 70, dark, light);
+	const digit1 = new Digit("d1", 52, 70, dark, light);
+	const digit2 = new Digit("d2", 52, 70, dark, light);
+	const digit3 = new Digit("d3", 52, 70, dark, light);
+	const digit4 = new Digit("d4", 52, 70, dark, light);
+
+	function setSegmentState(segment, lit) {
+		colour = lit ? light : dark;
+		piece = segment.substr(3, 1);
+		switch(piece) {
+			case "0":
+				document.getElementById(segment).style.borderTopColor = colour;
+				break;
+			case "1":
+			case "2":
+				document.getElementById(segment).style.borderRightColor = colour;
+				break;
+			case "3":
+				document.getElementById(segment).style.borderBottomColor = colour;
+				break;
+			case "4":
+			case "5":
+				document.getElementById(segment).style.borderLeftColor = colour;
+				break;
+			case "6":
+				//This segment (the central "G" one) is made of two div's borders
+				document.getElementById(segment + "Bottom").style.borderTopColor = colour;
+				document.getElementById(segment + "Top").style.borderBottomColor = colour;
+				break;
+			case "7":
+				document.getElementById(segment).style.background = colour;
+			case "8":
+				document.getElementById(segment).style.background = colour;
+			case "9":
+				document.getElementById(segment).style.background = colour;
+			break;
+		}
+	}
+
+	function isdigit(digit){
+		return (/^\d$/.test(digit));
+	}
+
+	function convertDigitTo7Segment(digit){
+		if (digit === undefined || digit === null) {
+			return [0,0,0,0,0,0,0];
+		}
+		if (String(digit) === "-") {
+			return [0,0,0,0,0,0,1];
+		}
+		if (!isdigit(digit)) {
+			return [0,0,0,0,0,0,0];
+		}
+		// var d = Math.min(9, Math.max(0, (digit !== undefined && digit !== null) ? Number(digit) : 0));
+		var d = Math.min(9, Math.max(0, Number(digit)));
+		var segmentStates = [[1,1,1,1,1,1,0], // 0
+							[0,1,1,0,0,0,0], // 1
+							[1,1,0,1,1,0,1], // 2
+							[1,1,1,1,0,0,1], // 3
+							[0,1,1,0,0,1,1], // 4
+							[1,0,1,1,0,1,1], // 5
+							[1,0,1,1,1,1,1], // 6
+							[1,1,1,0,0,0,0], // 7
+							[1,1,1,1,1,1,1], // 8
+							[1,1,1,1,0,1,1]];// 9
+		return segmentStates[d];
+	}
+
+	function set7SegmentDigit(digitIndex, digit){
+		// get segment states for the digit character
+		let segmentStates = convertDigitTo7Segment(digit);
+		// console.log("set7SegmentDigit: digitIndex=" + digitIndex + ", digit=" + digit + ", segmentStates=" + segmentStates);
+		// set segment states
+		setSegmentState("d" + digitIndex + "s0", segmentStates[0]); // A
+		setSegmentState("d" + digitIndex + "s1", segmentStates[1]); // B
+		setSegmentState("d" + digitIndex + "s2", segmentStates[2]); // C
+		setSegmentState("d" + digitIndex + "s3", segmentStates[3]); // D
+		setSegmentState("d" + digitIndex + "s4", segmentStates[4]); // E
+		setSegmentState("d" + digitIndex + "s5", segmentStates[5]); // F
+		// G is made of two parts
+		setSegmentState("d" + digitIndex + "s6", segmentStates[6]); // G Top
+		// setSegmentState("d" + digitIndex + "s6Top", segmentStates[6]); // G Top
+		// setSegmentState("d" + digitIndex + "s6Bottom", segmentStates[6]); // G Bottom
+	}
+
+
+
+	function calcClockDifference(){
+		var now = new Date();
+		var diffInMs = now.getTime() - zeroClock.getTime();
+		return diffInMs;
+	}
+
+	function getStartClockValue(){
+		var diffInMs = calcClockDifference();
+		var totalSeconds = Math.floor(diffInMs / 1000);
+		var minutes = Math.floor(Math.abs(totalSeconds) / 60);
+		var seconds = Math.abs(totalSeconds) % 60;
+		return {totalSeconds, minutes, seconds};
+	}
+
+	function displayStartClock(){
+		var {totalSeconds, minutes, seconds} = getStartClockValue();
+		var sign = totalSeconds < 0 ? "-" : "";
+		if (!isRun){
+			totalSeconds = 0;
+			minutes = 0;
+			seconds = 0;
+			sign = "";
+		}
+
+		document.getElementById('idDisplayClock').textContent = sign + minutes.toString() + ":" + seconds.toString().padStart(2, '0');
+
+		var digitsToDisplay = (sign + minutes.toString() + seconds.toString().padStart(2, '0')).padStart(5, ' ');
+		set7SegmentDigit(0, digitsToDisplay.charAt(0));
+		set7SegmentDigit(1, digitsToDisplay.charAt(1));
+		set7SegmentDigit(2, digitsToDisplay.charAt(2));
+		set7SegmentDigit(3, digitsToDisplay.charAt(3));
+		set7SegmentDigit(4, digitsToDisplay.charAt(4));
+		setSegmentState("d0s7", false);
+		setSegmentState("d0s8", false);
+		setSegmentState("d0s9", false);
+		setSegmentState("d1s7", false);
+		setSegmentState("d1s8", false);
+		setSegmentState("d1s9", false);
+		setSegmentState("d2s7", false);
+		setSegmentState("d2s8", true);
+		setSegmentState("d2s9", true);
+		setSegmentState("d3s7", false);
+		setSegmentState("d3s8", false);
+		setSegmentState("d3s9", false);
+		setSegmentState("d4s7", false);
+		setSegmentState("d4s8", false);
+		setSegmentState("d4s9", false);
+		if (sign == "" && seconds >= 56 && seconds <= 59) beep440();
+		if (sign == "" && seconds == 0) beep880();
+	}
+
+	function displayRealClock(){
+		// var elementRealClock = document.getElementById('idRealClock');
+		// var formattedDateTime = getCurrentDateTimeFormatted();
+		// elementRealClock.textContent = formattedDateTime;
+	}
+
+	function timeFn() {
+		displayRealClock();
+		displayStartClock();
+	}
+
+	function resizeClock() {
+		const el = document.getElementById("id_display");
+		// .style.width/.height can be empty if not set inline; use actual layout size
+		let clockHeight = el ? (el.offsetHeight || el.getBoundingClientRect().height) : 0;
+		let clockWidth = el ? (el.offsetWidth  || el.getBoundingClientRect().width)  : 0;
+		console.log("resizeClock: clockHeight=" + clockHeight + ", clockWidth=" + clockWidth);
+	}
+
+	function doResize() {
+		// document.getElementById("id-header-placeholder").style.height = document.getElementById("id-header").offsetHeight + "px";
+		// document.getElementById("id-footer-placeholder").style.height = document.getElementById("id-footer").offsetHeight + "px";
+		// document.getElementById("id-main").style.height = window.innerHeight - document.getElementById("id-header").offsetHeight - document.getElementById("id-footer").offsetHeight + "px";
+		document.getElementById("id-main").style.height = window.innerHeight + "px";
+		// document.getElementById("id_clock_container").style.height = document.getElementById("id-main").offsetHeight - 50 + "px";
+		document.getElementById("id_display").style.height = document.getElementById("id-main").offsetHeight + "px";
+		document.getElementById("id_settings").style.height = document.getElementById("id-main").offsetHeight + "px";
+		// document.getElementById("id_test").style.height = document.getElementById("id_display").offsetHeight - 50 + "px";
+		// document.getElementById("id_test").style.width = document.getElementById("id_display").offsetWidth - 50 + "px";
+
+		let displayHeight = document.getElementById("id_display").offsetHeight;
+		let displayWidth = document.getElementById("id_display").offsetWidth;
+		let heightMagnifyRatio = displayHeight / 70;
+		let widthMagnifyRatio = displayWidth / (5*52);
+		let magnify = Math.min(heightMagnifyRatio, widthMagnifyRatio)* 0.95;
+		digit0.magnify(magnify);
+		digit1.magnify(magnify);
+		digit2.magnify(magnify);
+		digit3.magnify(magnify);
+		digit4.magnify(magnify);
+	};
+
+	function getInitialStartTime(){
+		// let d = new Date();
+		let d = new Date(new Date().getTime()+10*60*1000);
+		let year = d.getFullYear();
+		let month = d.getMonth() + 1;
+		let day = d.getDate();
+		let hour = d.getHours();
+		let minute = d.getMinutes();
+		let retval = year + "-" + month.toString().padStart(2, '0') + "-" + day.toString().padStart(2, '0') + "T" + hour.toString().padStart(2, '0') + ":" + minute.toString().padStart(2, '0');
+		return(retval);
+	};
+
+	// var zeroClock = new Date().getTime()+30*1000;
+	var zeroClock = new Date(new Date().getTime()-50*1000);
+	// var zeroClock = new Date(new Date().getTime()+30*1000);
+	// var zeroClock = new Date(new Date().getTime());
+
+	function setZeroClockFromInputStartTime(){
+		var elementStartTime = document.getElementById('inputStartTime');
+		let year = elementStartTime.value.substring(0,4);
+		let month = elementStartTime.value.substring(5,7);
+		let day = elementStartTime.value.substring(8,10);
+		let hour = elementStartTime.value.substring(11,13);
+		let minute = elementStartTime.value.substring(14,16);
+		let second = "00";
+		zeroClock = constructDateFromParts(year, month, day, hour, minute, second);
+		// console.log("setZeroClockFromInputStartTime: zeroClock=" + zeroClock.toString());
+	}
+
+	function initForm(){
+		let elementSettings = document.getElementById("id_settings");
+		elementSettings.style.display = "none";
+		let elementDisplay = document.getElementById("id_display");
+		elementDisplay.style.display = "flex";
+
+
+		// var elementHour = document.getElementById('inputHour');
+		var elementStartTime = document.getElementById('inputStartTime');
+		
+		let params = (new URL(document.location)).searchParams;
+		// let paramHour = params.get('hour');
+		let paramStartTime = params.get('starttime');
+		
+		// elementHour.value = (paramHour !== null ? paramHour : "0");
+		elementStartTime.value = (paramStartTime !== null ? paramStartTime : getInitialStartTime());
+		
+		// zeroClock = new Date(new Date().getTime()-20*1000);
+		// let year = elementStartTime.value.substring(0,4);
+		// let month = elementStartTime.value.substring(5,7);
+		// let day = elementStartTime.value.substring(8,10);
+		// let hour = elementStartTime.value.substring(11,13);
+		// let minute = elementStartTime.value.substring(14,16);
+		// let second = "00";
+		// zeroClock = constructDateFromParts(year, month, day, hour, minute, second);
+		setZeroClockFromInputStartTime();
+		doOnChangeRun();
+		doOnChangeAudio();
+	}
+
+	function doOnLoad() {
+		doResize();
+		initForm();
+    	setInterval(timeFn, 1000);
+	};
+
+	window.addEventListener("resize", doResize);
+	window.addEventListener("load", doOnLoad);
+
+	function doOnChangeStartTime(){
+		setZeroClockFromInputStartTime();
+		// zeroClock = constructDateFromParts(year, month, day, hour, minute, second);
+		// console.log("doOnChangeStartTime: zeroClock=" + zeroClock.toString());
+	}
+
+	function doSubmit(){
+		document.getElementById("formSave").submit();
+	}
+</script>
+
+
+<script type="text/javascript" src="./js/startclock.js"></script>
+
+<script type="text/javascript">
+	var matrix = null;
+	var playMatrix = null;
+	var playStartCell = null;
+	var playEndCell = null;
+	var playHash = null;
+	var matrices = [null, null, null, null, null, null];
+	var startCells = [null, null, null, null, null, null];
+	var endCells = [null, null, null, null, null, null];
+	var hashes = [null, null, null, null, null, null];
+	var pdfdoc = null;
+	var filename = null;
+
+</script>
+
+
+<body>
+
+	<!-- <header class="w3-container w3-theme-l3 w3-top" id="id-header">
+
+		<div class="w3-bar w3-theme-l3">
+
+			<span class="w3-bar-item w3-text-indigo w3-left" style="padding-right:0px; padding-left:0px;">
+				<div
+					style="width: 27px; height: 27px; background: repeating-linear-gradient(135deg, white 0px, white 19px, orange 19px, orange 38px);">
+				</div>
+			</span>
+
+			<span class="w3-bar-item w3-text-indigo w3-left">Start Clock</span>
+
+		</div>
+
+	</header> -->
+
+
+	<!-- <div class="w3-container" id="id-header-placeholder">
+		<p>&nbsp;</p>
+	</div> -->
+
+
+	<!-- <div class="w3-display-container w3-theme-l4" style="overflow:auto; width:100%;" id="id-main"> -->
+	<div class="w3-display-container" style="overflow:auto; width:100%;" id="id-main">
+
+		<!-- <div class="w3-row-padding"> -->
+
+			<div class="w3-col s12 m12 l12 w3-center" id="id_clock_container">
+
+				<div class="settings" id="id_settings">
+					<!-- <p class="w3-text-indigo" id="id_settings_xxx">Settings</p> -->
+
+					<div class="w3-display-container w3-padding">&nbsp;
+						<div class="w3-display-center">
+							<label class="w3-center w3-text-indigo">Settings</label>
+						</div>
+					</div>
+
+					<label class="w3-left w3-text-indigo">Zero time:</label>
+					<div class="w3-display-container">&nbsp;
+						<form id="formSave" class="w3-container padding-0" enctype="multipart/form-data" method="get">
+							<input type="datetime-local" id="inputStartTime" name="starttime" class="w3-input padding-0" onchange="doOnChangeStartTime();">
+						</form>
+					</div>
+
+					<div class="w3-display-container w3-padding">&nbsp;
+						<div class="w3-display-left">
+							<input class="w3-check" type="checkbox" id="chk_run" onchange="doOnChangeRun();"><label for="chk_run" class="w3-text-indigo">&nbsp;Run</label>
+						</div>
+					</div>
+
+					<div class="w3-display-container w3-padding">&nbsp;
+						<div class="w3-display-left">
+							<input class="w3-check" type="checkbox" id="chk_audio" onchange="doOnChangeAudio();"><label for="chk_audio" class="w3-text-indigo">&nbsp;Audio</label>
+						</div>
+					</div>
+
+					<div class="w3-display-container w3-padding">&nbsp;
+						<div class="w3-display-left">
+							<span class="w3-bar-item w3-text-indigo w3-center" id="idDisplayClock">&nbsp;</span>
+						</div>
+					</div>					
+
+					<div class="w3-display-container w3-padding">&nbsp;
+						<div class="w3-display-left">
+							<input class="w3-button w3-blue w3-round" type="button" id="buttonShow" value="Show" onclick="doOnClickShow();">
+						</div>
+					</div>
+
+				</div>
+
+				<div class="display" id="id_display" onclick="doOnclickDisplay();">
+					<div class="digit" id="d0">
+						<div class="segA" ID="d0s0"></div>
+						<div class="segB" ID="d0s1"></div>
+						<div class="segC" ID="d0s2"></div>
+						<div class="segD" ID="d0s3"></div>
+						<div class="segE" ID="d0s4"></div>
+						<div class="segF" ID="d0s5"></div>
+						<div class="segGTop" ID="d0s6Top"></div>
+						<div class="segGBottom" ID="d0s6Bottom"></div>
+						<div class="segH" ID="d0s7"></div>
+						<div class="segI" ID="d0s8"></div>
+						<div class="segJ" ID="d0s9"></div>
+					</div>
+					<div class="digit" id="d1">
+						<div class="segA" ID="d1s0"></div>
+						<div class="segB" ID="d1s1"></div>
+						<div class="segC" ID="d1s2"></div>
+						<div class="segD" ID="d1s3"></div>
+						<div class="segE" ID="d1s4"></div>
+						<div class="segF" ID="d1s5"></div>
+						<div class="segGTop" ID="d1s6Top"></div>
+						<div class="segGBottom" ID="d1s6Bottom"></div>
+						<div class="segH" ID="d1s7"></div>
+						<div class="segI" ID="d1s8"></div>
+						<div class="segJ" ID="d1s9"></div>
+					</div>
+					<div class="digit" id="d2">
+						<div class="segA" ID="d2s0"></div>
+						<div class="segB" ID="d2s1"></div>
+						<div class="segC" ID="d2s2"></div>
+						<div class="segD" ID="d2s3"></div>
+						<div class="segE" ID="d2s4"></div>
+						<div class="segF" ID="d2s5"></div>
+						<div class="segGTop" ID="d2s6Top"></div>
+						<div class="segGBottom" ID="d2s6Bottom"></div>
+						<div class="segH" ID="d2s7"></div>
+						<div class="segI" ID="d2s8"></div>
+						<div class="segJ" ID="d2s9"></div>
+					</div>
+					<div class="digit" id="d3">
+						<div class="segA" ID="d3s0"></div>
+						<div class="segB" ID="d3s1"></div>
+						<div class="segC" ID="d3s2"></div>
+						<div class="segD" ID="d3s3"></div>
+						<div class="segE" ID="d3s4"></div>
+						<div class="segF" ID="d3s5"></div>
+						<div class="segGTop" ID="d3s6Top"></div>
+						<div class="segGBottom" ID="d3s6Bottom"></div>
+						<div class="segH" ID="d3s7"></div>
+						<div class="segI" ID="d3s8"></div>
+						<div class="segJ" ID="d3s9"></div>
+					</div>
+					<div class="digit" id="d4">
+						<div class="segA" ID="d4s0"></div>
+						<div class="segB" ID="d4s1"></div>
+						<div class="segC" ID="d4s2"></div>
+						<div class="segD" ID="d4s3"></div>
+						<div class="segE" ID="d4s4"></div>
+						<div class="segF" ID="d4s5"></div>
+						<div class="segGTop" ID="d4s6Top"></div>
+						<div class="segGBottom" ID="d4s6Bottom"></div>
+						<div class="segH" ID="d4s7"></div>
+						<div class="segI" ID="d4s8"></div>
+						<div class="segJ" ID="d4s9"></div>
+					</div>
+				</div>
+
+			</div>
+
+		<!-- </div> -->
+
+	</div>
+
+	<!-- <div class="w3-container" id="id-footer-placeholder">
+		<p>&nbsp;</p>
+	</div>
+
+
+	<footer class="w3-container w3-theme-l3 w3-bottom" id="id-footer">
+		<div class="w3-bar w3-theme-l3">
+			<span class="w3-bar-item w3-text-indigo w3-left">&copy; 2025 Magyar Tamás &amp; Magyar Gábor</span>
+			<span class="w3-bar-item w3-text-indigo w3-right" id="idRealClock">&nbsp;</span>
+		</div>
+	</footer> -->
+
+
+</body>
+
+</html>
